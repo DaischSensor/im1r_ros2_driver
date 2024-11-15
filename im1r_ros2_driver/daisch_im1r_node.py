@@ -5,7 +5,7 @@ from rclpy.node import Node
 import serial
 from .parser import parse_frame, euler_to_quaternion
 from sensor_msgs.msg import Imu, Temperature
-from im1r_interface.msg import Im1rExtra
+from im1r_ros2_interface.msg import Im1rExtra
 import math
 
 # Constants
