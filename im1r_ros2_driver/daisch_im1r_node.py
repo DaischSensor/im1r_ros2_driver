@@ -75,7 +75,7 @@ class IM1RDriverNode(Node):
         msg.orientation.x = quaternion[1]
         msg.orientation.y = quaternion[2]
         msg.orientation.z = quaternion[3]
-        msg.orientation_covariance[0] = msg.orientation_covariance[4] = msg.orientation_covariance[8] = TEMP_DBL
+        # msg.orientation_covariance[0] = msg.orientation_covariance[4] = msg.orientation_covariance[8] = TEMP_DBL
         self.pub_imu_data.publish(msg)
 
     def publish_temperature(self, stamp, data):
@@ -83,7 +83,7 @@ class IM1RDriverNode(Node):
         msg.header.stamp = stamp
         msg.header.frame_id = FRAME_ID
         msg.temperature = data['Temperature']
-        msg.variance = TEMP_DBL
+        # msg.variance = TEMP_DBL
         self.pub_temperature.publish(msg)
     
     def publish_extra_data(self, data):
@@ -94,12 +94,12 @@ class IM1RDriverNode(Node):
         msg.roll = data['Roll']
         msg.yaw = data['Yaw']
         msg.imu_status = data['IMUStatus']
-        msg.gyro_bias_x = data['GyroBiasX']
-        msg.gyro_bias_y = data['GyroBiasY']
-        msg.gyro_bias_z = data['GyroBiasZ']
-        msg.gyro_static_bias_x = data['GyroStaticBiasX']
-        msg.gyro_static_bias_y = data['GyroStaticBiasY']
-        msg.gyro_static_bias_z = data['GyroStaticBiasZ']
+        msg.gyro_bias_x = data['GyroBiasX'] * (math.pi / 180)
+        msg.gyro_bias_y = data['GyroBiasY'] * (math.pi / 180)
+        msg.gyro_bias_z = data['GyroBiasZ'] * (math.pi / 180)
+        msg.gyro_static_bias_x = data['GyroStaticBiasX'] * (math.pi / 180)
+        msg.gyro_static_bias_y = data['GyroStaticBiasY'] * (math.pi / 180)
+        msg.gyro_static_bias_z = data['GyroStaticBiasZ'] * (math.pi / 180)
         self.pub_im1r_extra.publish(msg)
 
     def run(self):
