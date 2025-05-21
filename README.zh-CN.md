@@ -97,16 +97,16 @@
    对于 ROS2  Foxy
    
    ```shell
-   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
    echo "source /opt/ros/foxy/setup.bash" >> ~/.bashrc
+   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
    
    对于 ROS2  Humble
    
    ```shell
-   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
    echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
 
