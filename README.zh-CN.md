@@ -45,6 +45,7 @@
 ### 系统要求
 
 - Ubuntu 22.04 / ROS2 Humble
+- Ubuntu 20.04 / ROS2 Foxy
 
 ### 安装步骤
 
@@ -75,17 +76,27 @@
    git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
    
-5. 构建工作空间：
+5. 安装 ROS 依赖项：
+
+   ```shell
+   cd ~/ros2_ws
+   rosdep install --from-paths src --ignore-src -r -y
+   ```
+   
+6. 构建工作空间：
 
    ```shell
    cd ~/ros2_ws/
    colcon build
    ```
 
-6. 添加工作空间的环境变量到 `.bashrc`：
+7. 添加工作空间的环境变量到 `.bashrc`：
+
+   ⚠️ **注意：**如果之前已经在 .bashrc 中添加过以下内容，请不要重复添加，以免出现重复加载或配置混乱。
 
    ```shell
    echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/<ros-distro>/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
 
@@ -98,22 +109,23 @@
    ``` shell
    sudo dmesg | grep tty
    ```
-
-3. 设置串口权限：
+   
    假设 IM1R 设备连接到 /dev/ttyUSB0：
 
    ``` shell
    sudo chmod 666 /dev/ttyUSB0
    ```
 
+3. 确认 IM1R 设备的波特率，默认波特率是115200，可通过上位机 DS_RVision 来更改
+
 4. 启动驱动节点：
+
+   - 假设当前IM1R连接的串口是 `/dev/ttyUSB0`
+   - 假设当前IM1R使用的波特率是 `115200`
 
    ``` shell
    ros2 run im1r_ros2_driver im1r_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
    ```
-
-   - `/dev/ttyUSB0` 是当前IM1R连接的串口
-   - `115200` 是当前IM1R使用的波特率
 
 5. 列出所有话题：
 

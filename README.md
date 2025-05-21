@@ -45,6 +45,7 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 ### System Requirements
 
 - Ubuntu 22.04 / ROS2 Humble
+- Ubuntu 20.04 / ROS2 Foxy
 
 ### Installation Setups
 
@@ -74,18 +75,28 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    git clone https://github.com/DAISCHSensor/im1r_ros2_driver.git
    git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
+
+5. Install ROS dependencies：
+
+   ```shell
+   cd ~/ros2_ws
+   rosdep install --from-paths src --ignore-src -r -y
+   ```
    
-5. Build the driver:
+6. Build the driver:
 
    ``` shell
    cd ~/ros2_ws/
    colcon build
    ```
 
-6. Update the `.bashrc` file:
+7. Update the `.bashrc` file:
+
+   ⚠️ **Note**: If you've already added these lines to your .bashrc, do not add them again to avoid duplicates.
 
    ``` shell
    echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/<ros-distro>/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
 
@@ -98,22 +109,22 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    ``` shell
    sudo dmesg | grep tty
    ```
-
-3. Set the serial port permissions:
+   
    Assuming the IM1R device is connected to /dev/ttyUSB0:
 
    ``` shell
    sudo chmod 666 /dev/ttyUSB0
    ```
 
+3. Confirm the baud rate of the IM1R device. The default baud rate is 115200, which can be modified via the host computer software DS_RVision.
+
 4. Launch the driver node:
+   - Assume the serial port connected to the IM1R is `/dev/ttyUSB0` 
+   - Assume the baud rate used by the IM1R is `115200` 
 
    ``` shell
    ros2 run im1r_ros2_driver im1r_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
    ```
-
-   - `/dev/ttyUSB0` is the serial port.
-   - `115200` is the baud rate used by IM1R, adjust it as needed.
 
 5. List all the topic:
 
