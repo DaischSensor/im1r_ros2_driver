@@ -93,10 +93,20 @@
 7. 添加工作空间的环境变量到 `.bashrc`：
 
    ⚠️ **注意：**如果之前已经在 .bashrc 中添加过以下内容，请不要重复添加，以免出现重复加载或配置混乱。
-
+   
+   对于 ROS2  Foxy
+   
    ```shell
    echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
-   echo "source /opt/ros/<ros-distro>/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/foxy/setup.bash" >> ~/.bashrc
+   source ~/.bashrc
+   ```
+   
+   对于 ROS2  Humble
+   
+   ```shell
+   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
 

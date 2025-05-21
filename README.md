@@ -94,9 +94,18 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 
    ⚠️ **Note**: If you've already added these lines to your .bashrc, do not add them again to avoid duplicates.
 
+   If your ROS2 version is Foxy
+   
    ``` shell
    echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
-   echo "source /opt/ros/<ros-distro>/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/foxy/setup.bash" >> ~/.bashrc
+   source ~/.bashrc
+   ```
+   If your ROS2 version is Humble
+   
+   ``` shell
+   echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
+   echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
    source ~/.bashrc
    ```
 
