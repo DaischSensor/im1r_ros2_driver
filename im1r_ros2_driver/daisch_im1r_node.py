@@ -10,7 +10,7 @@ import math
 
 # Constants
 TEMP_DBL = -1.0
-MIN_FRAME_LEN = 68
+MIN_FRAME_LEN = 47
 FRAME_ID = "IM1R"
 DEFAULT_PORT = '/dev/ttyUSB0'
 DEFAULT_BAUDRATE = 115200
@@ -97,21 +97,21 @@ class IM1RDriverNode(Node):
     def publish_extra_data(self, data):
         msg = Im1rExtra()
         msg.count = data.get('Count', 0)
-        msg.timestamp = data.get('Timestamp', 0.0)
+        # msg.timestamp = data.get('Timestamp', 0.0)
         msg.pitch = data.get('Pitch', 0.0)
         msg.roll = data.get('Roll', 0.0)
         msg.yaw = data.get('Yaw', 0.0)
         msg.imu_status = data.get('IMUStatus', 0)
 
-        def deg_to_rad_safe(val):
-            return (val or 0.0) * (math.pi / 180)
+        # def deg_to_rad_safe(val):
+        #     return (val or 0.0) * (math.pi / 180)
 
-        msg.gyro_bias_x = deg_to_rad_safe(data.get('GyroBiasX'))
-        msg.gyro_bias_y = deg_to_rad_safe(data.get('GyroBiasY'))
-        msg.gyro_bias_z = deg_to_rad_safe(data.get('GyroBiasZ'))
-        msg.gyro_static_bias_x = deg_to_rad_safe(data.get('GyroStaticBiasX'))
-        msg.gyro_static_bias_y = deg_to_rad_safe(data.get('GyroStaticBiasY'))
-        msg.gyro_static_bias_z = deg_to_rad_safe(data.get('GyroStaticBiasZ'))
+        # msg.gyro_bias_x = deg_to_rad_safe(data.get('GyroBiasX'))
+        # msg.gyro_bias_y = deg_to_rad_safe(data.get('GyroBiasY'))
+        # msg.gyro_bias_z = deg_to_rad_safe(data.get('GyroBiasZ'))
+        # msg.gyro_static_bias_x = deg_to_rad_safe(data.get('GyroStaticBiasX'))
+        # msg.gyro_static_bias_y = deg_to_rad_safe(data.get('GyroStaticBiasY'))
+        # msg.gyro_static_bias_z = deg_to_rad_safe(data.get('GyroStaticBiasZ'))
 
         self.pub_im1r_extra.publish(msg)
 
