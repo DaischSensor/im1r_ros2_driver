@@ -60,6 +60,8 @@ class IM1RDriverNode(Node):
         self.serial_com.clear_buff()
         self.get_logger().info(f"Serial Port {self.serial_port} Opened at {self.serial_baudrate} baudrate")
 
+        self.last_print_time = self.get_clock().now()
+
     def publish_imu_data(self, stamp, data):
         msg = Imu()
         msg.header.stamp = stamp
@@ -84,6 +86,15 @@ class IM1RDriverNode(Node):
             msg.orientation.z = quaternion[3]
             
         # msg.orientation_covariance[0] = msg.orientation_covariance[4] = msg.orientation_covariance[8] = TEMP_DBL
+        
+        now = self.get_clock().now()
+        if (now - self.last_print_time).nanoseconds >= 1e8:
+            self.get_logger().info(
+                f"Quaternion -> w: {msg.orientation.w:.4f}, x: {msg.orientation.x:.4f}, "
+                f"y: {msg.orientation.y:.4f}, z: {msg.orientation.z:.4f}"
+            )
+            self.last_print_time = now
+
         self.pub_imu_data.publish(msg)
 
     def publish_temperature(self, stamp, data):
