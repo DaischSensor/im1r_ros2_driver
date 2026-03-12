@@ -275,16 +275,26 @@ void IM1RDriver::publish_data(const FrameData& data)
     imu_msg->angular_velocity.y = data.gyro[1] * DEG_TO_RAD;
     imu_msg->angular_velocity.z = data.gyro[2] * DEG_TO_RAD;
     
-    // Orientation (Quaternion)
-    // Check if quat is all zeros (invalid)
-    if (data.quat[0] == 0 && data.quat[1] == 0 && data.quat[2] == 0 && data.quat[3] == 0) {
-         // Convert Euler to Quat if quat is empty (User example computes quat though)
-         // But frame provides quat, so use it.
+    const float qw = data.quat[0];
+    const float qx = data.quat[1];
+    const float qy = data.quat[2];
+    const float qz = data.quat[3];
+
+    const float norm2 = qw * qw + qx * qx + qy * qy + qz * qz;
+    constexpr float kQuatNormEps2 = 1e-12f;
+    if (norm2 < kQuatNormEps2) {
+        RCLCPP_WARN_THROTTLE(
+            this->get_logger(),
+            *this->get_clock(),
+            5000,
+            "IMU quaternion is near-zero (%.3e). IMU may be not initialized or abnormal.",
+            static_cast<double>(norm2));
     }
-    imu_msg->orientation.w = data.quat[0];
-    imu_msg->orientation.x = data.quat[1];
-    imu_msg->orientation.y = data.quat[2];
-    imu_msg->orientation.z = data.quat[3];
+
+    imu_msg->orientation.w = qw;
+    imu_msg->orientation.x = qx;
+    imu_msg->orientation.y = qy;
+    imu_msg->orientation.z = qz;
     
     pub_imu_->publish(std::move(imu_msg));
     
@@ -303,10 +313,6 @@ void IM1RDriver::publish_data(const FrameData& data)
     extra_msg->roll = data.att[1];
     extra_msg->yaw = data.att[2];
     extra_msg->imu_status = data.imu_status;
-    
-    // Biases are not in the new FrameData structure from user example
-    // They were in old protocol but not in this 72-byte example.
-    // Leave them as 0.
     
     pub_extra_->publish(std::move(extra_msg));
 }
