@@ -52,23 +52,13 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 1. Install ROS2:
    Please refer to the [ROS2 Documentation](https://docs.ros.org/en/humble/index.html) for detailed instructions.
 
-2. Install Dependencies:
-
-      Run the following commands to install dependencies based on your system's Python version:
-      
-        ```shell
-        sudo apt update
-        sudo apt install python3-pip
-        pip3 install pyserial
-        ```
-
-3. Create ROS2 workspace:
+2. Create ROS2 workspace:
 
    ``` shell
    mkdir -p ~/ros2_ws/src
    ```
 
-4. Clone the project repository to the src directory of your catkin workspace:
+3. Clone the project repository to the src directory of your catkin workspace:
 
    ``` shell
    cd ~/ros2_ws/src
@@ -76,21 +66,27 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
 
-5. Install ROS dependencies：
+4. Install ROS dependencies：
 
    ```shell
    cd ~/ros2_ws
    rosdep install --from-paths src --ignore-src -r -y
    ```
+   If `rosdep` is not available on your system, install it first:
+   ```shell
+   sudo apt update
+   sudo apt install python3-rosdep
+   rosdep update
+   ```
    
-6. Build the driver:
+5. Build the driver:
 
    ``` shell
    cd ~/ros2_ws/
    colcon build
    ```
 
-7. Update the `.bashrc` file:
+6. Update the `.bashrc` file:
 
    ⚠️ **Note**: If you've already added these lines to your .bashrc, do not add them again to avoid duplicates.
 
@@ -131,9 +127,17 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    - Assume the serial port connected to the IM1R is `/dev/ttyUSB0` 
    - Assume the baud rate used by the IM1R is `115200` 
 
+   **Method 1: Using ros2 run**
    ``` shell
-   ros2 run im1r_ros2_driver im1r_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
+   ros2 run im1r_ros2_driver im1r_driver_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
    ```
+
+   **Method 2: Using launch file**
+   ``` shell
+   ros2 launch im1r_ros2_driver im1r_driver.launch.py serial_port:=/dev/ttyUSB0 baud_rate:=115200 frame_id:=IM1R
+   ```
+   Launch arguments: `serial_port`, `baud_rate`, `frame_id`.
+   You can also edit the default values in [im1r_driver.launch.py](file:///home/daisch/ros2_ws/src/im1r_ros2_driver/launch/im1r_driver.launch.py) if needed.
 
 5. List all the topic:
 

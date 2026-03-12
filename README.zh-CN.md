@@ -52,23 +52,13 @@
 1. 安装 ROS2：
    请参考 [ROS2文档](https://docs.ros.org/en/humble/index.html) 获取详细说明。
 
-2. 安装依赖项：
-
-   运行以下命令安装依赖项：
-
-   ```shell
-   sudo apt update
-   sudo apt install python3-pip
-   pip3 install pyserial
-   ```
-
-3. 创建 ROS2 工作空间：
+2. 创建 ROS2 工作空间：
 
    ```shell
    mkdir -p ~/ros2_ws/src
    ```
    
-4. 克隆项目仓库到 src 目录：
+3. 克隆项目仓库到 src 目录：
 
    ```shell
    cd ~/ros2_ws/src
@@ -76,21 +66,27 @@
    git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
    
-5. 安装 ROS 依赖项：
+4. 安装 ROS 依赖项：
 
    ```shell
    cd ~/ros2_ws
    rosdep install --from-paths src --ignore-src -r -y
    ```
+   如果系统中没有安装 `rosdep`，请先安装并更新：
+   ```shell
+   sudo apt update
+   sudo apt install python3-rosdep
+   rosdep update
+   ```
    
-6. 构建工作空间：
+5. 构建工作空间：
 
    ```shell
    cd ~/ros2_ws/
    colcon build
    ```
 
-7. 添加工作空间的环境变量到 `.bashrc`：
+6. 添加工作空间的环境变量到 `.bashrc`：
 
    ⚠️ **注意：**如果之前已经在 .bashrc 中添加过以下内容，请不要重复添加，以免出现重复加载或配置混乱。
    
@@ -133,9 +129,17 @@
    - 假设当前IM1R连接的串口是 `/dev/ttyUSB0`
    - 假设当前IM1R使用的波特率是 `115200`
 
+   **方法 1: 使用 ros2 run**
    ``` shell
-   ros2 run im1r_ros2_driver im1r_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
+   ros2 run im1r_ros2_driver im1r_driver_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
    ```
+
+   **方法 2: 使用 launch 文件**
+   ``` shell
+   ros2 launch im1r_ros2_driver im1r_driver.launch.py serial_port:=/dev/ttyUSB0 baud_rate:=115200 frame_id:=IM1R
+   ```
+   可用参数：`serial_port`、`baud_rate`、`frame_id`。
+   如有需要，也可以直接修改 [im1r_driver.launch.py](file:///home/daisch/ros2_ws/src/im1r_ros2_driver/launch/im1r_driver.launch.py) 中的默认参数。
 
 5. 列出所有话题：
 
