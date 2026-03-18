@@ -12,9 +12,13 @@ endif()
 
 # Find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(im1r_ros2_interface REQUIRED)
+
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Im1rExtra.msg"
+)
 
 include_directories(include)
 
@@ -29,8 +33,10 @@ target_include_directories(im1r_driver_lib PUBLIC
 ament_target_dependencies(im1r_driver_lib
   rclcpp
   sensor_msgs
-  im1r_ros2_interface
 )
+
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} "rosidl_typesupport_cpp")
+target_link_libraries(im1r_driver_lib "${cpp_typesupport_target}")
 
 # Create the executable
 add_executable(im1r_driver_node src/main.cpp)
@@ -38,8 +44,9 @@ target_link_libraries(im1r_driver_node im1r_driver_lib)
 ament_target_dependencies(im1r_driver_node
   rclcpp
   sensor_msgs
-  im1r_ros2_interface
 )
+
+target_link_libraries(im1r_driver_node "${cpp_typesupport_target}")
 
 # Install
 install(TARGETS im1r_driver_lib im1r_driver_node
@@ -61,5 +68,7 @@ if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()

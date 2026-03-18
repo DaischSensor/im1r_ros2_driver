@@ -20,9 +20,8 @@ inline T readLE(const uint8_t* p)
     T v; std::memcpy(&v, p, sizeof(T)); return v;
 }
 
-// Static consts definition (for linkage if needed, though C++17 inline variables preferred but sticking to C++14/std style)
-constexpr uint8_t IM1RDriver::HEAD[2];
-constexpr uint8_t IM1RDriver::TAIL[2];
+const uint8_t IM1RDriver::HEAD[2] = {0xA5, 0x5A};
+const uint8_t IM1RDriver::TAIL[2] = {0x0D, 0x0A};
 
 IM1RDriver::IM1RDriver(const rclcpp::NodeOptions & options)
 : Node("im1r_driver_node", options),
@@ -42,7 +41,7 @@ IM1RDriver::IM1RDriver(const rclcpp::NodeOptions & options)
   // Create publishers
   pub_imu_ = this->create_publisher<sensor_msgs::msg::Imu>("imu/data", 10);
   pub_temp_ = this->create_publisher<sensor_msgs::msg::Temperature>("temperature", 10);
-  pub_extra_ = this->create_publisher<im1r_ros2_interface::msg::Im1rExtra>("im1r/extra", 10);
+  pub_extra_ = this->create_publisher<im1r_ros2_driver::msg::Im1rExtra>("im1r/extra", 10);
 
   // Open serial port
   serial_fd_ = open_serial(serial_port_, baud_rate_);
@@ -141,28 +140,27 @@ uint8_t IM1RDriver::crc8(const uint8_t* buf, size_t len)
     return crc;
 }
 
-std::optional<FrameData> IM1RDriver::parse_frame(const uint8_t* f)
+bool IM1RDriver::parse_frame(const uint8_t* f, FrameData& out)
 {
     // Check header (already checked by caller but double check safe)
-    if (std::memcmp(f, HEAD, HEAD_LEN)) return std::nullopt;
+    if (std::memcmp(f, HEAD, HEAD_LEN)) return false;
     
     // Check LEN
-    if (f[HEAD_LEN + DOM_LEN + CMD_LEN] != DATA_LEN) return std::nullopt; // f[4] == 64
+    if (f[HEAD_LEN + DOM_LEN + CMD_LEN] != DATA_LEN) return false; // f[4] == 64
     
     // Check Tail
-    if (f[FRAME_LEN-2] != TAIL[0] || f[FRAME_LEN-1] != TAIL[1]) return std::nullopt;
+    if (f[FRAME_LEN-2] != TAIL[0] || f[FRAME_LEN-1] != TAIL[1]) return false;
     
     // Check CRC
     size_t crc_off = HEAD_LEN + DOM_LEN + CMD_LEN + LEN_LEN + DATA_LEN; // 2+1+1+1+64 = 69
     // CRC is at index 69 (0-based)
     if (crc8(f, crc_off) != f[crc_off]) {
         RCLCPP_DEBUG(this->get_logger(), "CRC mismatch");
-        return std::nullopt;
+        return false;
     }
     
     // Parse
     const uint8_t* d = f + HEAD_LEN + DOM_LEN + CMD_LEN + LEN_LEN; // Data starts at index 5
-    FrameData out;
     out.count        = d[0];
     out.timestamp_ms = readLE<uint64_t>(d+1);
     for (int i=0;i<3;++i) out.acc[i]  = readLE<float>(d+ 9 +4*i);
@@ -172,7 +170,7 @@ std::optional<FrameData> IM1RDriver::parse_frame(const uint8_t* f)
     out.temperature  = readLE<int16_t>(d+61)*0.1f;
     out.imu_status   = d[63];
     
-    return out;
+    return true;
 }
 
 void IM1RDriver::read_loop()
@@ -223,20 +221,13 @@ void IM1RDriver::read_loop()
                 
                 // Parse frame
                 const uint8_t* frame_ptr = &buf[pos];
-                auto parsed = parse_frame(frame_ptr);
-                
-                if (parsed) {
+                FrameData parsed{};
+                if (parse_frame(frame_ptr, parsed)) {
                     // Success
-                    publish_data(*parsed);
+                    publish_data(parsed);
                     
                     // Remove this frame
                     buf.erase(buf.begin(), buf.begin() + pos + FRAME_LEN);
-                    
-                    // Debug print (occasional)
-                    // static int log_cnt = 0;
-                    // if (log_cnt++ % 100 == 0) {
-                    //     RCLCPP_DEBUG(this->get_logger(), "Parsed frame CNT=%d", parsed->count);
-                    // }
                 } else {
                     // Failed to parse (CRC error or invalid fields)
                     // Skip header and search again
@@ -306,13 +297,20 @@ void IM1RDriver::publish_data(const FrameData& data)
     pub_temp_->publish(std::move(temp_msg));
     
     // Publish Extra
-    auto extra_msg = std::make_unique<im1r_ros2_interface::msg::Im1rExtra>();
+    auto extra_msg = std::make_unique<im1r_ros2_driver::msg::Im1rExtra>();
     extra_msg->count = data.count;
     extra_msg->timestamp = data.timestamp_ms;
     extra_msg->pitch = data.att[0];
     extra_msg->roll = data.att[1];
     extra_msg->yaw = data.att[2];
     extra_msg->imu_status = data.imu_status;
+
+    extra_msg->gyro_bias_x = 0.0;
+    extra_msg->gyro_bias_y = 0.0;
+    extra_msg->gyro_bias_z = 0.0;
+    extra_msg->gyro_static_bias_x = 0.0;
+    extra_msg->gyro_static_bias_y = 0.0;
+    extra_msg->gyro_static_bias_z = 0.0;
     
     pub_extra_->publish(std::move(extra_msg));
 }

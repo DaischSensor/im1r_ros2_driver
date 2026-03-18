@@ -46,6 +46,7 @@
 
 - Ubuntu 22.04 / ROS2 Humble
 - Ubuntu 20.04 / ROS2 Foxy
+- 支持 C++14 的编译器（必需）
 
 ### 安装步骤
 
@@ -63,7 +64,6 @@
    ```shell
    cd ~/ros2_ws/src
    git clone https://github.com/DAISCHSensor/im1r_ros2_driver.git
-   git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
    
 4. 安装 ROS 依赖项：

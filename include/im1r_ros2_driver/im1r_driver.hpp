@@ -4,15 +4,13 @@
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/imu.hpp>
 #include <sensor_msgs/msg/temperature.hpp>
-#include <im1r_ros2_interface/msg/im1r_extra.hpp>
+#include <im1r_ros2_driver/msg/im1r_extra.hpp>
 
 #include <string>
 #include <vector>
 #include <thread>
 #include <atomic>
 #include <mutex>
-#include <optional>
-#include <array>
 
 // Serial headers
 #include <termios.h>
@@ -54,7 +52,7 @@ private:
   // Publishers
   rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr pub_imu_;
   rclcpp::Publisher<sensor_msgs::msg::Temperature>::SharedPtr pub_temp_;
-  rclcpp::Publisher<im1r_ros2_interface::msg::Im1rExtra>::SharedPtr pub_extra_;
+  rclcpp::Publisher<im1r_ros2_driver::msg::Im1rExtra>::SharedPtr pub_extra_;
 
   // Methods
   int open_serial(const std::string& dev, int baud);
@@ -62,14 +60,14 @@ private:
   void read_loop();
   
   // Helpers
-  std::optional<FrameData> parse_frame(const uint8_t* f);
+  bool parse_frame(const uint8_t* f, FrameData& out);
   uint8_t crc8(const uint8_t* buf, size_t len);
   
   void publish_data(const FrameData& data);
 
   // Constants
-  static constexpr uint8_t HEAD[2] = {0xA5, 0x5A};
-  static constexpr uint8_t TAIL[2] = {0x0D, 0x0A};
+  static const uint8_t HEAD[2];
+  static const uint8_t TAIL[2];
   
   static constexpr size_t HEAD_LEN = 2;
   static constexpr size_t DOM_LEN  = 1;

@@ -46,6 +46,7 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 
 - Ubuntu 22.04 / ROS2 Humble
 - Ubuntu 20.04 / ROS2 Foxy
+- C++14 compiler support (required)
 
 ### Installation Setups
 
@@ -63,7 +64,6 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    ``` shell
    cd ~/ros2_ws/src
    git clone https://github.com/DAISCHSensor/im1r_ros2_driver.git
-   git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
 
 4. Install ROS dependencies：
