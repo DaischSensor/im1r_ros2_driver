@@ -30,7 +30,6 @@
   - [参数介绍](#参数介绍)
     - [标准话题](#标准话题)
       - [imu/data](#imudata)
-      - [temperature](#temperature)
     - [自定义话题](#自定义话题)
       - [im1r/extra](#im1rextra)
   - [贡献](#贡献)
@@ -41,6 +40,15 @@
 本项目旨在开发和维护适用于 IM1R 产品的 ROS2 驱动程序。
 
 ## 入门指南
+
+### 重要提醒（迁移说明）
+
+⚠️ 本驱动已从 Python 版本重构为 C++ 版本，原先独立的自定义消息包 `im1r_ros2_interface` 已合并到本仓库/软件包中。
+
+- 可执行文件名称变化：`im1r_node`（Python）→ `im1r_driver_node`（C++）
+- 话题变化：
+  - 不再发布 `/temperature`（温度信息合并在 `im1r/extra` 中）
+- 如果你是从旧的 Python 版本升级过来，为避免运行到旧节点/旧产物，请清理并重新编译工作空间。
 
 ### 系统要求
 
@@ -83,7 +91,7 @@
 
    ```shell
    cd ~/ros2_ws/
-   colcon build
+   colcon build --packages-select im1r_ros2_driver
    ```
 
 6. 添加工作空间的环境变量到 `.bashrc`：
@@ -157,7 +165,6 @@
 ## 发布的话题
 
 - `imu/data` ([sensor_msgs/Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)) 四元数、角速度和线性加速度
-- `temperature` ([sensor_msgs/Temperature](http://docs.ros.org/api/sensor_msgs/html/msg/Temperature.html)) 来自设备的温度
 - `im1r/extra` ([DAISCH 自定义话题](#custom-topic)) 来自 **IM1R** 的额外参数
 
 ## 参数介绍
@@ -184,33 +191,19 @@
 | float64 `linear_acceleration.z`              | ✔️        |
 | float64[9] `linear_acceleration_covariance`  | ✘        |
 
-#### temperature
-
-| Variable                                     | Supported |
-| -------------------------------------------- | --------- |
-| time `header.stamp`                          | ✔️        |
-| string `header.frame_id`                     | ✔️        |
-| float64 `temperature`                        | ✔️        |
-| float64 `variance`                           | ✘        |
-
 ### 自定义话题
 
 #### im1r/extra
 
 | Variable                   | Type       | Definition                                | Unit              | Remarks                                             |
 | -------------------------- | ---------- | ----------------------------------------- | ----------------- | --------------------------------------------------- |
-| `count`                    | uint8      | Message counter                           | -                 | 0~255 cyclic increment                              |
-| `timestamp`                | uint64     | Timestamp of the measurement              | microseconds (µs) | UNIX time                                           |
-| `pitch`                    | float64    | Pitch angle                               | degrees (°)       |                                                     |
-| `roll`                     | float64    | Roll angle                                | degrees (°)       |                                                     |
-| `yaw` | float64 | Yaw angle | degrees (°) | |
-| `imu_status`               | uint8      | IMU status indicator                      | -                 | Bit 0: Acceleration valid (0) / invalid (1)<br>Bit 2: Angular velocity valid (0) / invalid (1)<br>Higher bits are not defined   |
-| `gyro_bias_x`              | float64    | Gyroscope bias along the X axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_y`              | float64    | Gyroscope bias along the Y axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_z`              | float64    | Gyroscope bias along the Z axis           | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_x`       | float64    | Static gyroscope bias along the X axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_y`       | float64    | Static gyroscope bias along the Y axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_z`       | float64    | Static gyroscope bias along the Z axis    | radians/second (rad/s) |                                                 |
+| `count`                    | uint8      | 消息计数器                                | -                 | 0~255 循环递增                                      |
+| `timestamp`                | uint64     | 测量时间戳                                | microseconds (µs) | UNIX 时间                                           |
+| `pitch`                    | float64    | 俯仰角（Pitch）                           | degrees (°)       |                                                     |
+| `roll`                     | float64    | 横滚角（Roll）                            | degrees (°)       |                                                     |
+| `yaw`                      | float64    | 偏航角（Yaw）                             | degrees (°)       |                                                     |
+| `imu_status`               | uint8      | IMU 状态                                  | -                 | Bit 定义请参考产品手册。                            |
+| `temperature`              | float64    | 温度                                      | degrees Celsius (°C) |                                                  |
 
 
 ## 贡献

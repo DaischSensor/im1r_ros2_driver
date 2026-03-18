@@ -40,7 +40,7 @@ IM1RDriver::IM1RDriver(const rclcpp::NodeOptions & options)
 
   // Create publishers
   pub_imu_ = this->create_publisher<sensor_msgs::msg::Imu>("imu/data", 10);
-  pub_temp_ = this->create_publisher<sensor_msgs::msg::Temperature>("temperature", 10);
+  // pub_temp_ = this->create_publisher<sensor_msgs::msg::Temperature>("temperature", 10);
   pub_extra_ = this->create_publisher<im1r_ros2_driver::msg::Im1rExtra>("im1r/extra", 10);
 
   // Open serial port
@@ -290,11 +290,11 @@ void IM1RDriver::publish_data(const FrameData& data)
     pub_imu_->publish(std::move(imu_msg));
     
     // Publish Temperature
-    auto temp_msg = std::make_unique<sensor_msgs::msg::Temperature>();
-    temp_msg->header.stamp = stamp;
-    temp_msg->header.frame_id = frame_id_;
-    temp_msg->temperature = data.temperature;
-    pub_temp_->publish(std::move(temp_msg));
+    // auto temp_msg = std::make_unique<sensor_msgs::msg::Temperature>();
+    // temp_msg->header.stamp = stamp;
+    // temp_msg->header.frame_id = frame_id_;
+    // temp_msg->temperature = data.temperature;
+    // pub_temp_->publish(std::move(temp_msg));
     
     // Publish Extra
     auto extra_msg = std::make_unique<im1r_ros2_driver::msg::Im1rExtra>();
@@ -304,13 +304,7 @@ void IM1RDriver::publish_data(const FrameData& data)
     extra_msg->roll = data.att[1];
     extra_msg->yaw = data.att[2];
     extra_msg->imu_status = data.imu_status;
-
-    extra_msg->gyro_bias_x = 0.0;
-    extra_msg->gyro_bias_y = 0.0;
-    extra_msg->gyro_bias_z = 0.0;
-    extra_msg->gyro_static_bias_x = 0.0;
-    extra_msg->gyro_static_bias_y = 0.0;
-    extra_msg->gyro_static_bias_z = 0.0;
+    extra_msg->temperature = static_cast<double>(data.temperature);
     
     pub_extra_->publish(std::move(extra_msg));
 }

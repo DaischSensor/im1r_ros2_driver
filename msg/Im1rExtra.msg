@@ -4,9 +4,4 @@ float64 pitch
 float64 roll
 float64 yaw
 uint8 imu_status
-float64 gyro_bias_x
-float64 gyro_bias_y
-float64 gyro_bias_z
-float64 gyro_static_bias_x
-float64 gyro_static_bias_y
-float64 gyro_static_bias_z
+float64 temperature

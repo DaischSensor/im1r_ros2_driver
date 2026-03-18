@@ -30,7 +30,6 @@
   - [Parameters Introductions](#parameters-introductions)
     - [Standard Topic](#standard-topic)
       - [imu/data](#imudata)
-      - [temperature](#temperature)
     - [Custom Topic](#custom-topic)
       - [im1r/extra](#im1rextra)
   - [Contributing](#contributing)
@@ -41,6 +40,15 @@
 This project aims to develop and maintain ROS2 drivers for the IM1R product.
 
 ## Getting Started
+
+### Important Notice (Migration)
+
+⚠️ This driver has been refactored from a Python implementation to a C++ implementation, and the former standalone message package `im1r_ros2_interface` has been merged into this repository/package.
+
+- Executable name changed: `im1r_node` (Python) → `im1r_driver_node` (C++)
+- Topic changes:
+  - `/temperature` is no longer published (temperature is provided in `im1r/extra`)
+- If you upgraded from an older Python version, clean your workspace overlay to avoid running stale nodes.
 
 ### System Requirements
 
@@ -83,7 +91,7 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 
    ``` shell
    cd ~/ros2_ws/
-   colcon build
+   colcon build --packages-select im1r_ros2_driver
    ```
 
 6. Update the `.bashrc` file:
@@ -154,7 +162,6 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 ## Published Topics
 
 - `imu/data` ([sensor_msgs/Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)) quaternion, angular velocity and linear acceleration
-- `temperature` ([sensor_msgs/Temperature](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)) temperature from device
 - `im1r/extra` ([DAISCH Custom Topic](#custom-topic)) extra params from **IM1R**
 
 ## Parameters Introductions
@@ -181,15 +188,6 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 | float64 `linear_acceleration.z`              | ✔️        |
 | float64[9] `linear_acceleration_covariance`  | ✘        |
 
-#### temperature
-
-| Variable                                     | Supported |
-| -------------------------------------------- | --------- |
-| time `header.stamp`                          | ✔️        |
-| string `header.frame_id`                     | ✔️        |
-| float64 `temperature`                        | ✔️        |
-| float64 `variance`                           | ✘        |
-
 ### Custom Topic
 
 #### im1r/extra
@@ -201,13 +199,8 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 | `pitch`                    | float64    | Pitch angle                               | degrees (°)       |                                                     |
 | `roll`                     | float64    | Roll angle                                | degrees (°)       |                                                     |
 | `yaw` | float64 | Yaw angle | degrees (°) | |
-| `imu_status`               | uint8      | IMU status indicator                      | -                 | Bit 0: Acceleration valid (0) / invalid (1)<br>Bit 2: Angular velocity valid (0) / invalid (1)<br>Higher bits are not defined   |
-| `gyro_bias_x`              | float64    | Gyroscope bias along the X axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_y`              | float64    | Gyroscope bias along the Y axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_z`              | float64    | Gyroscope bias along the Z axis           | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_x`       | float64    | Static gyroscope bias along the X axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_y`       | float64    | Static gyroscope bias along the Y axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_z`       | float64    | Static gyroscope bias along the Z axis    | radians/second (rad/s) |                                                 |
+| `imu_status`               | uint8      | IMU status indicator                      | -                 | See the product manual for bit definitions. |
+| `temperature`              | float64    | Temperature                               | degrees Celsius (°C) |                                                  |
 
 
 ## Contributing
