@@ -22,6 +22,7 @@
 - [IM1R\_ROS\_Driver](#im1r_ros_driver)
   - [Table of Contents](#table-of-contents)
   - [Project Description](#project-description)
+  - [Branches](#branches)
   - [Getting Started](#getting-started)
     - [System Requirements](#system-requirements)
     - [Installation Setups](#installation-setups)
@@ -30,7 +31,6 @@
   - [Parameters Introductions](#parameters-introductions)
     - [Standard Topic](#standard-topic)
       - [imu/data](#imudata)
-      - [temperature](#temperature)
     - [Custom Topic](#custom-topic)
       - [im1r/extra](#im1rextra)
   - [Contributing](#contributing)
@@ -40,57 +40,73 @@
 
 This project aims to develop and maintain ROS2 drivers for the IM1R product.
 
+## Branches
+
+| Branch | Description |
+| ------ | ----------- |
+| `main` | Primary maintained branch. It contains the current stable implementation of the driver. |
+| `backup/python-implementation` | Archive of the previous Python implementation. Use this branch when the legacy Python driver is required. |
+| `feature/high-frequency-protocol` | Development branch for supporting the IM1R high-frequency communication protocol. |
+| `debug/show-quat` | Debug branch that prints quaternion orientation messages for troubleshooting. |
+
+Branches other than `main` are retained for development, compatibility, debugging, or historical reference and may not receive ongoing updates.
+
 ## Getting Started
+
+### Important Notice (Migration)
+
+⚠️ This driver has been refactored from a Python implementation to a C++ implementation, and the former standalone message package `im1r_ros2_interface` has been merged into this repository/package.
+
+- Executable name changed: `im1r_node` (Python) → `im1r_driver_node` (C++)
+- Topic changes:
+  - `/temperature` is no longer published (temperature is provided in `im1r/extra`)
+- If you upgraded from an older Python version, clean your workspace overlay to avoid running stale nodes.
 
 ### System Requirements
 
 - Ubuntu 22.04 / ROS2 Humble
 - Ubuntu 20.04 / ROS2 Foxy
+- C++14 compiler support (required)
 
 ### Installation Setups
 
 1. Install ROS2:
    Please refer to the [ROS2 Documentation](https://docs.ros.org/en/humble/index.html) for detailed instructions.
 
-2. Install Dependencies:
-
-      Run the following commands to install dependencies based on your system's Python version:
-      
-        ```shell
-        sudo apt update
-        sudo apt install python3-pip
-        pip3 install pyserial
-        ```
-
-3. Create ROS2 workspace:
+2. Create ROS2 workspace:
 
    ``` shell
    mkdir -p ~/ros2_ws/src
    ```
 
-4. Clone the project repository to the src directory of your catkin workspace:
+3. Clone the project repository to the src directory of your catkin workspace:
 
    ``` shell
    cd ~/ros2_ws/src
    git clone https://github.com/DAISCHSensor/im1r_ros2_driver.git
-   git clone https://github.com/DAISCHSensor/im1r_ros2_interface.git
    ```
 
-5. Install ROS dependencies：
+4. Install ROS dependencies：
 
    ```shell
    cd ~/ros2_ws
    rosdep install --from-paths src --ignore-src -r -y
    ```
+   If `rosdep` is not available on your system, install it first:
+   ```shell
+   sudo apt update
+   sudo apt install python3-rosdep
+   rosdep update
+   ```
    
-6. Build the driver:
+5. Build the driver:
 
    ``` shell
    cd ~/ros2_ws/
-   colcon build
+   colcon build --packages-select im1r_ros2_driver
    ```
 
-7. Update the `.bashrc` file:
+6. Update the `.bashrc` file:
 
    ⚠️ **Note**: If you've already added these lines to your .bashrc, do not add them again to avoid duplicates.
 
@@ -131,9 +147,17 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
    - Assume the serial port connected to the IM1R is `/dev/ttyUSB0` 
    - Assume the baud rate used by the IM1R is `115200` 
 
+   **Method 1: Using ros2 run**
    ``` shell
-   ros2 run im1r_ros2_driver im1r_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
+   ros2 run im1r_ros2_driver im1r_driver_node --ros-args -p serial_port:=/dev/ttyUSB0 -p baud_rate:=115200
    ```
+
+   **Method 2: Using launch file**
+   ``` shell
+   ros2 launch im1r_ros2_driver im1r_driver.launch.py serial_port:=/dev/ttyUSB0 baud_rate:=115200 frame_id:=IM1R
+   ```
+   Launch arguments: `serial_port`, `baud_rate`, `frame_id`.
+   You can also edit the default values in [im1r_driver.launch.py](file:///home/daisch/ros2_ws/src/im1r_ros2_driver/launch/im1r_driver.launch.py) if needed.
 
 5. List all the topic:
 
@@ -150,7 +174,6 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 ## Published Topics
 
 - `imu/data` ([sensor_msgs/Imu](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)) quaternion, angular velocity and linear acceleration
-- `temperature` ([sensor_msgs/Temperature](http://docs.ros.org/api/sensor_msgs/html/msg/Imu.html)) temperature from device
 - `im1r/extra` ([DAISCH Custom Topic](#custom-topic)) extra params from **IM1R**
 
 ## Parameters Introductions
@@ -177,15 +200,6 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 | float64 `linear_acceleration.z`              | ✔️        |
 | float64[9] `linear_acceleration_covariance`  | ✘        |
 
-#### temperature
-
-| Variable                                     | Supported |
-| -------------------------------------------- | --------- |
-| time `header.stamp`                          | ✔️        |
-| string `header.frame_id`                     | ✔️        |
-| float64 `temperature`                        | ✔️        |
-| float64 `variance`                           | ✘        |
-
 ### Custom Topic
 
 #### im1r/extra
@@ -197,13 +211,8 @@ This project aims to develop and maintain ROS2 drivers for the IM1R product.
 | `pitch`                    | float64    | Pitch angle                               | degrees (°)       |                                                     |
 | `roll`                     | float64    | Roll angle                                | degrees (°)       |                                                     |
 | `yaw` | float64 | Yaw angle | degrees (°) | |
-| `imu_status`               | uint8      | IMU status indicator                      | -                 | Bit 0: Acceleration valid (0) / invalid (1)<br>Bit 2: Angular velocity valid (0) / invalid (1)<br>Higher bits are not defined   |
-| `gyro_bias_x`              | float64    | Gyroscope bias along the X axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_y`              | float64    | Gyroscope bias along the Y axis           | radians/second (rad/s) |                                                 |
-| `gyro_bias_z`              | float64    | Gyroscope bias along the Z axis           | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_x`       | float64    | Static gyroscope bias along the X axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_y`       | float64    | Static gyroscope bias along the Y axis    | radians/second (rad/s) |                                                 |
-| `gyro_static_bias_z`       | float64    | Static gyroscope bias along the Z axis    | radians/second (rad/s) |                                                 |
+| `imu_status`               | uint8      | IMU status indicator                      | -                 | See the product manual for bit definitions. |
+| `temperature`              | float64    | Temperature                               | degrees Celsius (°C) |                                                  |
 
 
 ## Contributing
