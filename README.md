@@ -22,6 +22,7 @@
 - [IM1R\_ROS\_Driver](#im1r_ros_driver)
   - [Table of Contents](#table-of-contents)
   - [Project Description](#project-description)
+  - [Branches](#branches)
   - [Getting Started](#getting-started)
     - [System Requirements](#system-requirements)
     - [Installation Setups](#installation-setups)
@@ -38,6 +39,17 @@
 ## Project Description
 
 This project aims to develop and maintain ROS2 drivers for the IM1R product.
+
+## Branches
+
+| Branch | Description |
+| ------ | ----------- |
+| `main` | Primary maintained branch. It contains the current stable implementation of the driver. |
+| `backup/python-implementation` | Archive of the previous Python implementation. Use this branch when the legacy Python driver is required. |
+| `feature/high-frequency-protocol` | Development branch for supporting the IM1R high-frequency communication protocol. |
+| `debug/show-quat` | Debug branch that prints quaternion orientation messages for troubleshooting. |
+
+Branches other than `main` are retained for development, compatibility, debugging, or historical reference and may not receive ongoing updates.
 
 ## Getting Started
 
